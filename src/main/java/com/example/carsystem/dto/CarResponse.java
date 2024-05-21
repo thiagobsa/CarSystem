@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CarResponse {
 	
+	
+
 	private Long id;
 	
     private String model;
@@ -19,4 +21,5 @@ public class CarResponse {
 
     private Integer year;
 
+   
 }

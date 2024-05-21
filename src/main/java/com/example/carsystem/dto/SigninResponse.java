@@ -27,4 +27,15 @@ public class SigninResponse {
     
     private String accessToken;
     
+    public SigninResponse(Long id, String firstName, String lastName, String birthday, String phone, String email, String lastLogin, String createdAt) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthday = birthday;
+        this.phone = phone;
+        this.email = email;
+        this.lastLogin = lastLogin;
+        this.createdAt = createdAt;
+    }
+    
 }
