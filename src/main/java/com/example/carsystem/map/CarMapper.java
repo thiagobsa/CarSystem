@@ -17,7 +17,7 @@ public class CarMapper implements Mapper<CarEntity, CarResponse> {
                 input.getModel(),
                 input.getColor(),
                 input.getLicensePlate(),
-                input.getYear()
+                input.getCarYear()
         );
     }
 }

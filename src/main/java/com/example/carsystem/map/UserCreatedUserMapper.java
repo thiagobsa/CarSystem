@@ -37,7 +37,7 @@ public class UserCreatedUserMapper implements Mapper<UserEntity, UserCreated> {
                         car.getColor(),
                         car.getLicensePlate(),
                         car.getModel(),
-                        car.getYear()))
+                        car.getCarYear()))
                 .collect(Collectors.toList());
 
         
