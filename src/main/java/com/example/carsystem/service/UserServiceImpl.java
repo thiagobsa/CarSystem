@@ -1,14 +1,11 @@
 package com.example.carsystem.service;
 
-import java.security.InvalidKeyException;
-import java.time.Instant;
-import java.util.Date;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,203 +19,254 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.carsystem.dto.CarRequest;
 import com.example.carsystem.dto.SigninRequest;
 import com.example.carsystem.dto.SigninResponse;
+import com.example.carsystem.dto.UserCreated;
 import com.example.carsystem.dto.UserRequest;
 import com.example.carsystem.dto.UserResponse;
 import com.example.carsystem.exceptions.ValidateExceptions;
 import com.example.carsystem.map.Mapper;
-import com.example.carsystem.map.SigninResponseUserMap;
+import com.example.carsystem.map.UserCreatedUserMapper;
 import com.example.carsystem.model.UserEntity;
 import com.example.carsystem.repository.UserRepository;
 
-
-import jakarta.persistence.EntityNotFoundException;
+import java.time.Instant;
+import java.util.Date;
 
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
+	
+	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
+	@Autowired
+	private UserRepository repository;
 
-    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	@Autowired
+	private CarService carService;
 
-    @Autowired
-    private UserRepository repository;
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Autowired
-    private CarService carService;
+	@Autowired
+	@Lazy
+	private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private Mapper userResponseUserMapper;
+	@Autowired
+	private JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    private Mapper userCreatedUserMapper;
+	@Autowired
+	private Mapper<UserEntity, UserResponse> userEntityToUserResponseMapper;
 
-    @Autowired
-    private Mapper userRequestToUserEntityMapper;
+	@Autowired
+	private Mapper<UserEntity, UserCreated> userEntityToUserResponseCreateMapper;
 
-    @Autowired
-    private Mapper signinResponseUserMap;
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+	@Autowired
+	private Mapper<UserRequest, UserEntity> userRequestToUserEntityMapper;
 
-    @Override
-    @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = repository.findByEmail(username);
-        if (user == null) {
-            logger.error("User not found: " + username);
-            throw new UsernameNotFoundException("Email not found");
-        }
-        logger.info("User found: " + username);
-        return user;
-    }
+	@Autowired
+	private Mapper<UserEntity, SigninResponse> userEntityToSigninResponseMapper;
 
-    @Override
-    @Transactional
-    public SigninResponse authenticateUser(SigninRequest signinRequest) {
-        UserEntity userEntity = repository.findByLogin(signinRequest.getLogin());
-        if (userEntity == null) {
-            throw new ValidateExceptions("Invalid login or password");
-        }
+	@Value("${jwt.secret}")
+	private String jwtSecret;
 
-        String password = userEntity.getPassword();
-        if (!bCryptPasswordEncoder.matches(signinRequest.getPassword(), password)) {
-            throw new ValidateExceptions("Invalid login or password");
-        }
-
-        String userName = userEntity.getUsername();
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userName, signinRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String accessToken = jwtTokenProvider.generateToken(authentication);
-
-        userEntity.setLastLogin(Instant.now());
-        userEntity = repository.save(userEntity);
-
-        SigninResponse signinResponse;
-		try {
-			signinResponse = (SigninResponse) signinResponseUserMap.map(userEntity);
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	@Override
+	@Transactional(readOnly = true)
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
+		UserEntity user = repository.findByEmail(username);
+		
+		if(user == null) {
+			logger.error("User not found: " + username);
+			throw new UsernameNotFoundException("Email not found");
 		}
-        signinResponse.setAccessToken(accessToken);
+		
+		logger.info("User found: " + username);
+		return user; 
+	}
 
-        return signinResponse;
-    }
+	@Override
+	@Transactional
+	public SigninResponse authenticateUser(SigninRequest signinRequest) {
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Object> findAllPaged(Pageable pageable) {
-        return repository.findAll(pageable).map(userResponseUserMapper::map);
-    }
+		UserEntity userEntity = repository.findByLogin(signinRequest.getLogin());
+		if(userEntity == null){
+			throw new ValidateExceptions("Invalid login or password");
+		}
 
-    @Override
-    @Transactional
-    public UserResponse create(UserRequest userRequest) {
-        validateAttributes(userRequest);
+		String userName = userEntity.getUsername();
+		String password = userEntity.getPassword();
 
-        UserEntity userEntity = (UserEntity) userRequestToUserEntityMapper.map(userRequest);
-        userEntity.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
+		boolean isMatcherPassword = bCryptPasswordEncoder.matches(signinRequest.getPassword(), password);
+		if(!isMatcherPassword){
+			throw new ValidateExceptions("Invalid login or password");
+		}
 
-        return (UserResponse) userCreatedUserMapper.map(repository.save(userEntity));
-    }
+		Authentication authentication = authenticationManager
+				.authenticate(new UsernamePasswordAuthenticationToken(userName, signinRequest.getPassword()));
 
-    @Override
-    @Transactional(readOnly = true)
-    public UserResponse findById(Long id) {
-        UserEntity userEntity = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Entity not found: " + id));
-        return (UserResponse) userResponseUserMapper.map(userEntity);
-    }
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        repository.deleteById(id);
-    }
+		String accessToken = jwtTokenProvider.generateToken(authentication);
 
-    @Override
-    @Transactional
-    public UserResponse update(Long id, UserRequest userRequest) {
-        validateAttributes(userRequest);
+		userEntity.setLastLogin(Instant.now());
+		userEntity = repository.save(userEntity);
 
-        UserEntity userEntity = repository.getOne(id);
-        userEntity.setFirstName(userRequest.getFirstName());
-        userEntity.setLastName(userRequest.getLastName());
-        userEntity.setEmail(userRequest.getEmail());
-        userEntity.setBirthday(userRequest.getBirthday());
-        userEntity.setLogin(userRequest.getLogin());
-        userEntity.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
-        userEntity.setPhone(userRequest.getPhone());
+		SigninResponse signinResponse = userEntityToSigninResponseMapper.map(userEntity);
 
-        return (UserResponse) userResponseUserMapper.map(repository.save(userEntity));
-    }
+		signinResponse.setAccessToken(accessToken);
 
-    @Override
-    @Transactional
-    public void validateAttributes(UserRequest userRequest) {
-        if (repository.existsByEmail(userRequest.getEmail())) {
-            throw new ValidateExceptions("Email already exists");
-        }
+		return signinResponse;
+	}
 
- 
-        if (repository.existsByLogin(userRequest.getLogin())) {
-            throw new ValidateExceptions("Login already exists");
-        }
+	@Override
+	@Transactional(readOnly = true)
+	public Page<UserResponse> findAllPaged(Pageable pageable) {
 
-        String firstName = userRequest.getFirstName();
-        String lastName = userRequest.getLastName();
-        String email = userRequest.getEmail();
-        Date birthday = userRequest.getBirthday();
-        String login = userRequest.getLogin();
-        String password = userRequest.getPassword();
-        String phone = userRequest.getPhone();
+		return repository.findAll(pageable).map(userEntityToUserResponseMapper::map);
+	}
 
-        if (firstName == null || firstName.isEmpty() || firstName.isBlank()
-                || lastName == null || lastName.isEmpty() || lastName.isBlank()
-                || email == null || email.isEmpty() || email.isBlank()
-                || birthday == null
-                || login == null || login.isEmpty() || login.isBlank()
-                || password == null || password.isEmpty() || password.isBlank()
-                || phone == null || phone.isEmpty() || phone.isBlank()) {
-            throw new ValidateExceptions("Missing fields");
-        }
+	@Override
+	@Transactional
+	public UserCreated create(UserRequest userRequest) {
 
-        userRequest.getCars().forEach(car -> carService.validateAttributes(car));
-    }
+		validateAtributtes(userRequest);
 
-    @Override
-    @Transactional
-    public void deleteAll() {
-        repository.deleteAll();
-    }
+		UserEntity userEntity = userRequestToUserEntityMapper.map(userRequest);
+		userEntity.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
 
-    @Override
-    @Transactional(readOnly = true)
-    public UserResponse findAuthenticateUser(String token) {
-        if (token == null || token.isEmpty() || token.isBlank()) {
-            throw new ValidateExceptions("Unauthorized");
-        }
+		return UserCreatedUserMapper.map(repository.save(userEntity));
+	}
 
-        try {
-            Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+	@Override
+	@Transactional(readOnly = true)
+	public UserResponse findById(Long id) {
 
-            String username = claims.getSubject();
+		UserEntity userEntity = repository.findById(id).orElseThrow(() -> new RuntimeException("Entity not found: " + id));
+		return userEntityToUserResponseMapper.map(userEntity);
+	}
 
-            UserEntity userEntity = repository.findByEmail(username);
+	@Override
+	@Transactional
+	public void delete(Long id) {
 
-            return (UserResponse) userResponseUserMapper.map(userEntity);
+		repository.deleteById(id);
+	}
 
-        } catch (ValidateExceptions e) {
-            throw new ValidateExceptions("Unauthorized - invalid session");
-        } catch (InvalidKeyException e) {
-            throw new ValidateExceptions("Invalid JWT token");
-        } catch (Exception e) {
-            throw new ValidateExceptions("Unauthorized");
-        }
-    }
+	@Override
+	@Transactional
+	public UserResponse update(Long id, UserRequest userRequest) {
+
+		validateAtributtes(userRequest);
+
+		UserEntity userEntity = repository.getOne(id);
+
+		userEntity.setFirstName(userRequest.getFirstName());
+		userEntity.setLastName(userRequest.getLastName());
+		userEntity.setEmail(userRequest.getEmail());
+		userEntity.setBirthday(userRequest.getBirthday());
+		userEntity.setLogin(userRequest.getLogin());
+		userEntity.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
+		userEntity.setPhone(userRequest.getPhone());
+
+		return userEntityToUserResponseMapper.map(repository.save(userEntity));
+	}
+
+	public void validateAttributes(UserRequest userRequest) {
+
+		boolean existsEmail = repository.existsByEmail(userRequest.getEmail());
+		if(existsEmail){
+			throw new ValidateExceptions("Email already exists");
+		}
+
+		boolean existsLogin = repository.existsByLogin(userRequest.getLogin());
+		if(existsLogin){
+			throw new ValidateExceptions("Login already exists");
+		}
+
+		String firstName = userRequest.getFirstName();
+		String lastName = userRequest.getLastName();
+		String email = userRequest.getEmail();
+		Date birthday = userRequest.getBirthday();
+		String login = userRequest.getLogin();
+		String password = userRequest.getPassword();
+		String phone = userRequest.getPhone();
+
+		if( (firstName == null || firstName.isEmpty() || firstName.isBlank())
+				|| (lastName == null || lastName.isEmpty() || lastName.isBlank())
+				|| (email == null || email.isEmpty() || email.isBlank())
+				|| birthday == null
+				|| (login == null || login.isEmpty() || login.isBlank())
+				|| (password == null || password.isEmpty() || password.isBlank())
+				|| (phone == null || phone.isEmpty() || phone.isBlank())){
+
+			throw new ValidateExceptions("Missing fields");
+		}
+
+		userRequest.getCars().forEach(car -> {
+			carService.validateAttributes(car);
+		});
+	}
+
+	@Override
+	@Transactional
+	public void deleteAll() {
+		repository.deleteAll();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public UserResponse findAuthenticateUser(String token) {
+
+		if(token == null || token.isEmpty() || token.isBlank()){
+			throw new ValidateExceptions("Unauthorized");
+		}
+
+		try{
+			Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+
+			String username = claims.getSubject();
+
+			UserEntity userEntity = repository.findByEmail(username);
+
+			return userEntityToUserResponseMapper.map(userEntity);
+
+		} catch (Exception e){
+			if(e instanceof ExpiredJwtException){
+				throw new ValidateExceptions("Unauthorized - invalid session");
+			}
+		}
+		return null;
+	}
+
+	
+	public SigninResponse authenticateUser1(SigninRequest signinRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+	public UserResponse create1(UserRequest userRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public UserEntity findUserById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+	public UserResponse update1(Long id, UserRequest userRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void validateAttributes(UserRequest userRequest) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

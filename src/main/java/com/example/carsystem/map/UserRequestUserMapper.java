@@ -24,7 +24,7 @@ public class UserRequestUserMapper implements Mapper<UserRequest, UserEntity> {
         List<CarEntity> carEntityList = input.getCars().stream()
                 .map(car -> {
                     CarEntity carEntity = new CarEntity();
-                    carEntity.setYear(car.getYear());
+                    carEntity.setCarYear(car.getCarYear());
                     carEntity.setLicensePlate(car.getLicensePlate());
                     carEntity.setModel(car.getModel());
                     carEntity.setColor(car.getColor());

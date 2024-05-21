@@ -31,7 +31,7 @@ public class CarEntity implements Serializable {
 
     private String licensePlate;
 
-    private Integer year;
+    private Integer carYear;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
