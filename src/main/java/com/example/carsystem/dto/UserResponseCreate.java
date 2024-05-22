@@ -3,11 +3,10 @@ package com.example.carsystem.dto;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Data
-public class SigninResponse {
+public class UserResponseCreate {
 
     private Long id;
     private String firstName;
@@ -17,20 +16,21 @@ public class SigninResponse {
     private String phone;
     private String createdAt;
     private String lastLogin;
-    private String accessToken;
 
-    public SigninResponse(){
+    private List<CarResponse> cars = new ArrayList<>();
+
+    public UserResponseCreate(){
     }
 
-    public SigninResponse(Long id, String firstName, String lastName, String email, String birthday, String phone, String lastLogin, String createdAt) {
+    public UserResponseCreate(Long id, String firstName, String lastName, String email, String birthday, String phone, String createdAt, String lastLogin) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.birthday = birthday;
         this.phone = phone;
-        this.lastLogin = lastLogin;
         this.createdAt = createdAt;
+        this.lastLogin = lastLogin;
     }
 
     public Long getId() {
@@ -80,15 +80,7 @@ public class SigninResponse {
     public void setPhone(String phone) {
         this.phone = phone;
     }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
+    
     public String getCreatedAt() {
         return createdAt;
     }
@@ -104,5 +96,8 @@ public class SigninResponse {
     public void setLastLogin(String lastLogin) {
         this.lastLogin = lastLogin;
     }
-}
 
+    public List<CarResponse> getCars() {
+        return cars;
+    }
+}

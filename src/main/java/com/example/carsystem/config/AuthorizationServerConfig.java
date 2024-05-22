@@ -16,47 +16,47 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
-    
-    @Value("${security.oauth2.client.client-id}")
-    private String clientId;
-    
-    @Value("${security.oauth2.client.client-secret}")
-    private String clientSecret; 
-    
-    @Value("${jwt.duration}")
-    private String jwtDuration; 
-    
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    
-    @Autowired
-    private JwtAccessTokenConverter jwtAccessTokenConverter;
-    
-    @Autowired
-    private JwtTokenStore jwtTokenStore; 
-    
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    
-    @Override
-    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
-    }
+	
+	@Value("${security.oauth2.client.client-id}")
+	private String clientId;
+	
+	@Value("${security.oauth2.client.client-secret}")
+	private String clientSecret; 
+	
+	@Value("${jwt.duration}")
+	private String jwtDuration; 
+	
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@Autowired
+	private JwtAccessTokenConverter jwtAccessTokenConverter;
+	
+	@Autowired
+	private JwtTokenStore jwtTokenStore; 
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Override
+	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+		security.tokenKeyAccess("permittAll()").checkTokenAccess("isAuthenticated()");
+	}
 
-    @Override
-    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory()
-        .withClient(clientId)
-        .secret(bCryptPasswordEncoder.encode(clientSecret))
-        .scopes("read", "write")
-        .authorizedGrantTypes("password")
-        .accessTokenValiditySeconds(Integer.parseInt(jwtDuration)); 
-    }
+	@Override
+	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+		clients.inMemory()
+		.withClient(clientId)
+		.secret(bCryptPasswordEncoder.encode(clientSecret))
+		.scopes("read", "write")
+		.authorizedGrantTypes("password")
+		.accessTokenValiditySeconds(Integer.parseInt(jwtDuration)); 
+	}
 
-    @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.authenticationManager(authenticationManager)
-        .tokenStore(jwtTokenStore)
-        .accessTokenConverter(jwtAccessTokenConverter);
-    }
+	@Override
+	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+		endpoints.authenticationManager(authenticationManager)
+		.tokenStore(jwtTokenStore)
+		.accessTokenConverter(jwtAccessTokenConverter);
+	}
 }
