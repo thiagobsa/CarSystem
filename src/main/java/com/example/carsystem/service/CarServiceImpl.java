@@ -20,17 +20,16 @@ import com.example.carsystem.exceptions.*;
 
 @Service
 public class CarServiceImpl implements CarService {
-	
-	private Logger logger = LoggerFactory.getLogger(CarServiceImpl.class);
-	
-	@Autowired
-	private CarRepository repository;
 
-	@Autowired
-	private UserService userService;
+    private final CarRepository repository;
+    private final Mapper<CarEntity, CarResponse> carEntityToCarResponseMapper;
+    
+    private final UserService
 
-	@Autowired
-	private Mapper<CarEntity, CarResponse> carEntityToCarResponseMapper;
+    public CarServiceImpl(CarRepository repository, Mapper<CarEntity, CarResponse> carEntityToCarResponseMapper) {
+        this.repository = repository;
+        this.carEntityToCarResponseMapper = carEntityToCarResponseMapper;
+    }
 
 	@Override
 	@Transactional(readOnly = true)

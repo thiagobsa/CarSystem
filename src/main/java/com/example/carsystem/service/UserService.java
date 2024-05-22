@@ -13,23 +13,11 @@ import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
-    SigninResponse authenticateUser(SigninRequest signinRequest);
-
-    Page<Object> findAllPaged(Pageable pageable);
-
-    UserResponse create(UserRequest userRequest);
-
+	Page<UserResponse> findAllPaged(Pageable pageable);
     UserResponse findById(Long id);
-    
-    UserEntity findUserById(Long id);
-
-    UserResponse update(Long id, UserRequest userRequest);
-    
-    void validateAttributes(UserRequest userRequest);
-
-    UserResponse findAuthenticateUser(String token);
-    
     void delete(Long id);
-
+    UserResponse update(Long id, UserRequest userRequest);
+    UserResponse create(String token, UserRequest userRequest);
     void deleteAll();
+    UserResponse findAuthenticateUser(String token);
 }
