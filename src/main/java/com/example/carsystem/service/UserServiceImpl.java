@@ -32,6 +32,7 @@ import com.example.carsystem.exceptions.LoginAlreadyException;
 import com.example.carsystem.exceptions.LoginPasswordException;
 import com.example.carsystem.exceptions.MissingFieldsException;
 import com.example.carsystem.exceptions.TokenJWTExeption;
+import com.example.carsystem.exceptions.UserNotFoundExeption;
 import com.example.carsystem.map.Mapper;
 import com.example.carsystem.models.UserEntity;
 import com.example.carsystem.repositories.UserRepository;
@@ -63,17 +64,17 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 	private JwtTokenProvider jwtTokenProvider;
 
 	@Autowired
-	private Mapper<UserEntity, UserResponse> userEntityToUserResponseMapper;
+	private Mapper<UserEntity, UserResponse> userResponseMapper;
 
 	@Autowired
-	private Mapper<UserEntity, UserResponseCreate> userEntityToUserResponseCreateMapper;
+	private Mapper<UserEntity, UserResponseCreate> userResponseCreateMapper;
 
 
 	@Autowired
-	private Mapper<UserRequest, UserEntity> userRequestToUserEntityMapper;
+	private Mapper<UserRequest, UserEntity> userEntityMapper;
 
 	@Autowired
-	private Mapper<UserEntity, SigninResponse> userEntityToSigninResponseMapper;
+	private Mapper<UserEntity, SigninResponse> signinResponseMapper;
 
 	@Value("${jwt.secret}")
 	private String jwtSecret;
@@ -120,7 +121,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 		userEntity.setLastLogin(Instant.now());
 		userEntity = repository.save(userEntity);
 
-		SigninResponse signinResponse = userEntityToSigninResponseMapper.map(userEntity);
+		SigninResponse signinResponse = signinResponseMapper.map(userEntity);
 
 		signinResponse.setAccessToken(accessToken);
 
@@ -131,7 +132,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 	@Transactional(readOnly = true)
 	public Page<UserResponse> findAllPaged(Pageable pageable) {
 
-		return repository.findAll(pageable).map(userEntityToUserResponseMapper::map);
+		return repository.findAll(pageable).map(userResponseMapper::map);
 	}
 
 	@Override
@@ -140,18 +141,18 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
 		validateAtributtes(userRequest);
 
-		UserEntity userEntity = userRequestToUserEntityMapper.map(userRequest);
+		UserEntity userEntity = userEntityMapper.map(userRequest);
 		userEntity.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
 
-		return userEntityToUserResponseCreateMapper.map(repository.save(userEntity));
+		return userResponseCreateMapper.map(repository.save(userEntity));
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public UserResponse findById(Long id) {
 
-		UserEntity userEntity = repository.findById(id).orElseThrow(() -> new RuntimeException("Entity not found: " + id));
-		return userEntityToUserResponseMapper.map(userEntity);
+		UserEntity userEntity = repository.findById(id).orElseThrow(() -> new UserNotFoundExeption("Entity not found: " + id));
+		return userResponseMapper.map(userEntity);
 	}
 
 	@Override
@@ -182,7 +183,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 		userEntity.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
 		userEntity.setPhone(userRequest.getPhone());
 
-		return userEntityToUserResponseMapper.map(repository.save(userEntity));
+		return userResponseMapper.map(repository.save(userEntity));
 	}
 
 	public void validateAtributtes(UserRequest userRequest) {
@@ -242,7 +243,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
 			UserEntity userEntity = repository.findByEmail(username);
 
-			return userEntityToUserResponseMapper.map(userEntity);
+			return userResponseMapper.map(userEntity);
 
 		} catch (Exception e){
 			if(e instanceof ExpiredJwtException){

@@ -36,10 +36,10 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // Configurar comportamento do serviço mock para retornar um usuário criado
+        
         testUserResponse = new UserResponseCreate();
         testUserResponse.setId(1L);
-        // Se a classe UserResponseCreate tiver um método setter para o nome de usuário
+        
         testUserResponse.setUsername("TestUser");
     }
 
