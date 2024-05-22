@@ -1,117 +1,92 @@
 package com.example.carsystem.models;
 
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "tb_user")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class UserEntity implements UserDetails, Serializable {
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    
     private Long id;
+    
     private String firstName;
+    
     private String lastName;
+    
     private String email;
+    
     private Date birthday;
+    
     private String login;
+    
     private String password;
+    
     private String phone;
-    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-    private Instant createdAt;
-    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-    private Instant lastLogin;
-
+    
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<CarEntity> cars = new ArrayList<>();
 
-    public UserEntity(){
-    }
+    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+    private Instant createdAt;
+    
+    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
+    private Instant lastLogin;
 
-    public UserEntity(Long id, String firstName, String lastName, String email, Date birthday, String login, String password, String phone) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.birthday = birthday;
-        this.login = login;
-        this.password = password;
-        this.phone = phone;
-    }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public List<CarEntity> getCars() {
-        return cars;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
     @Override
-    public String getPassword() {
-        return password;
+    public String getUsername() {
+        return email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void addCar(CarEntity car) {
+        cars.add(car);
+        car.setUser(this);
     }
 
-    public String getPhone() {
-        return phone;
+    public void removeCar(CarEntity car) {
+        cars.remove(car);
+        car.setUser(null);
     }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    
 
     @Override
     public boolean equals(Object o) {
@@ -124,16 +99,6 @@ public class UserEntity implements UserDetails, Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
     }
 
     @Override
@@ -156,21 +121,11 @@ public class UserEntity implements UserDetails, Serializable {
         return true;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
     @PrePersist
     public void prePersist() {
         createdAt = Instant.now();
     }
 
-    public Instant getLastLogin() {
-        return lastLogin;
-    }
 
-    public void setLastLogin(Instant lastLogin) {
-        this.lastLogin = lastLogin;
-    }
+
 }
-

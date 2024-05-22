@@ -1,4 +1,4 @@
-package com.example.carsystem.config;
+package com.example.carsystem.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,16 +27,18 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	private String jwtDuration; 
 	
 	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
-	
-	@Autowired
-	private JwtAccessTokenConverter jwtAccessTokenConverter;
+	private AuthenticationManager authenticationManager;
 	
 	@Autowired
 	private JwtTokenStore jwtTokenStore; 
 	
 	@Autowired
-	private AuthenticationManager authenticationManager;
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@Autowired
+	private JwtAccessTokenConverter jwtAccessTokenConverter;
+
+	
 	
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
@@ -44,8 +46,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	}
 
 	@Override
-	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-		clients.inMemory()
+	public void configure(ClientDetailsServiceConfigurer client) throws Exception {
+		client.inMemory()
 		.withClient(clientId)
 		.secret(bCryptPasswordEncoder.encode(clientSecret))
 		.scopes("read", "write")
@@ -54,8 +56,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	}
 
 	@Override
-	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		endpoints.authenticationManager(authenticationManager)
+	public void configure(AuthorizationServerEndpointsConfigurer endpoint) throws Exception {
+		endpoint.authenticationManager(authenticationManager)
 		.tokenStore(jwtTokenStore)
 		.accessTokenConverter(jwtAccessTokenConverter);
 	}

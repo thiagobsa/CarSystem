@@ -1,4 +1,4 @@
-package com.example.carsystem.config;
+package com.example.carsystem.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,10 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder; 
+	private UserDetailsService userDetailsService;
 	
 	@Autowired
-	private UserDetailsService userDetailsService;
+	private BCryptPasswordEncoder bCryptPasswordEncoder; 
+	
+	
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {

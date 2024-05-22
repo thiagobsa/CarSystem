@@ -7,11 +7,15 @@ import com.example.carsystem.models.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
+	
+    boolean existsByEmail(String email);
+
+    boolean existsByLogin(String login);
+    
     UserEntity findByLogin(String login);
 
     UserEntity findByEmail(String username);
 
-    boolean existsByEmail(String email);
 
-    boolean existsByLogin(String login);
+    
 }

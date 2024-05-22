@@ -1,54 +1,28 @@
 package com.example.carsystem.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
-public class CarRequest {
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class CarRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
 
+    @NotBlank(message = "Year is required")
     private Integer year;
+
+    @NotBlank(message = "License plate is required")
     private String licensePlate;
+
+    @NotBlank(message = "Model is required")
     private String model;
+
+    @NotBlank(message = "Color is required")
     private String color;
-
-    public CarRequest(){
-    }
-
-    public CarRequest(Integer year, String licensePlate, String model, String color) {
-        this.year = year;
-        this.licensePlate = licensePlate;
-        this.model = model;
-        this.color = color;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public String getLicensePlate() {
-        return licensePlate;
-    }
-
-    public void setLicensePlate(String licensePlate) {
-        this.licensePlate = licensePlate;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
 }
