@@ -9,20 +9,13 @@ import com.example.carsystem.model.CarEntity;
 
 public interface CarService {
 
-    Page<CarResponse> findAllPaged(String token, Pageable pageable);
-
+	Page<CarResponse> findAllPaged(String token, Pageable pageable);
     CarResponse findById(String token, Long id);
-    
-    CarResponse create(String token, CarRequest carRequest);
-
-    CarResponse update(String token, Long id, CarRequest carRequest);
-    
-    void validateAttributes(CarEntity car);
-
-    boolean existsByLicensePlate(String licensePlate);
-    
     void delete(String token, Long id);
-
+    CarResponse update(String token, Long id, CarRequest carRequest);
+    CarResponse create(String token, CarRequest carRequest);
+    boolean existsByLicensePlate(String licensePlate);
+    void validateAttributes(CarRequest carRequest);
     void deleteAll();
 }
 
