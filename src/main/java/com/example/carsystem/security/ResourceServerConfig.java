@@ -1,4 +1,4 @@
-package com.example.carsystem.config;
+package com.example.carsystem.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +26,10 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 			"/oauth/token",
 			"/h2-console/**",
 			"/api/users/**",
+			"/api/cars",
 			"/api/signin",
-			"/api/me",
-			"/api/cars"
+			"/api/me"
+			
 	};
 
 	@Override

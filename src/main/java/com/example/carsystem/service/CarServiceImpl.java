@@ -8,28 +8,29 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import com.example.carsystem.dto.CarRequest;
 import com.example.carsystem.dto.CarResponse;
 import com.example.carsystem.dto.UserResponse;
+import com.example.carsystem.exceptions.LicensePlateException;
+import com.example.carsystem.exceptions.MissingFieldsException;
 import com.example.carsystem.map.Mapper;
-import com.example.carsystem.model.CarEntity;
-import com.example.carsystem.model.UserEntity;
-import com.example.carsystem.repository.CarRepository;
-import com.example.carsystem.exceptions.*;
+import com.example.carsystem.models.CarEntity;
+import com.example.carsystem.models.UserEntity;
+import com.example.carsystem.repositories.CarRepository;
 
 @Service
 public class CarServiceImpl implements CarService {
+	
+	private Logger logger = LoggerFactory.getLogger(CarServiceImpl.class);
+	
+	@Autowired
+	private CarRepository repository;
 
-    private final CarRepository repository;
-    private final Mapper<CarEntity, CarResponse> carEntityToCarResponseMapper;
-    
-    private final UserService
+	@Autowired
+	private UserService userService;
 
-    public CarServiceImpl(CarRepository repository, Mapper<CarEntity, CarResponse> carEntityToCarResponseMapper) {
-        this.repository = repository;
-        this.carEntityToCarResponseMapper = carEntityToCarResponseMapper;
-    }
+	@Autowired
+	private Mapper<CarEntity, CarResponse> carEntityToCarResponseMapper;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -69,7 +70,7 @@ public class CarServiceImpl implements CarService {
 
 		UserResponse userResponse = userService.findAuthenticateUser(token);
 
-		validateAttributes(carRequest);
+		validateAtributtes(carRequest);
 
 		CarEntity carEntity = repository.getOne(id);
 
@@ -77,7 +78,7 @@ public class CarServiceImpl implements CarService {
 			throw new RuntimeException("This car does not belong to the logged in user");
 		}
 
-		carEntity.setCarYear(carRequest.getYear());
+		carEntity.setYear(carRequest.getYear());
 		carEntity.setLicensePlate(carRequest.getLicensePlate());
 		carEntity.setModel(carRequest.getModel());
 		carEntity.setColor(carRequest.getColor());
@@ -91,10 +92,10 @@ public class CarServiceImpl implements CarService {
 
 		UserResponse userResponse = userService.findAuthenticateUser(token);
 
-		validateAttributes(carRequest);
+		validateAtributtes(carRequest);
 
 		CarEntity carEntity = new CarEntity();
-		carEntity.setCarYear(carRequest.getYear());
+		carEntity.setYear(carRequest.getYear());
 		carEntity.setLicensePlate(carRequest.getLicensePlate());
 		carEntity.setModel(carRequest.getModel());
 		carEntity.setColor(carRequest.getColor());
@@ -112,11 +113,12 @@ public class CarServiceImpl implements CarService {
 		return repository.existsByLicensePlate(licensePlate);
 	}
 
-	public void validateAttributes(CarRequest carRequest) {
+	@Override
+	public void validateAtributtes(CarRequest carRequest) {
 
 		boolean existsLicensePlate = existsByLicensePlate(carRequest.getLicensePlate());
 		if(existsLicensePlate){
-			throw  new ValidateExceptions("License plate already exists");
+			throw  new LicensePlateException("License plate already exists");
 		}
 
 		int year = carRequest.getYear();
@@ -127,7 +129,7 @@ public class CarServiceImpl implements CarService {
 		if( year <= 0 || (licensePlate == null || licensePlate.isEmpty() || licensePlate.isBlank())
 				|| (model == null || model.isEmpty() || model.isBlank())
 				|| (color == null || color.isEmpty() || color.isBlank()) ){
-			throw new ValidateExceptions("Missing fields");
+			throw new MissingFieldsException("Missing fields");
 		}
 	}
 
@@ -136,11 +138,4 @@ public class CarServiceImpl implements CarService {
 	public void deleteAll() {
 		repository.deleteAll();
 	}
-
-	@Override
-	public void validateAttributes(CarEntity car) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

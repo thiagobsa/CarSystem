@@ -17,13 +17,21 @@ import java.util.List;
 public class UserCreated {
 
     private Long id;
+    
     private String firstName;
+    
     private String lastName;
+    
     private String birthday;
+    
     private String phone;
+    
     private String email;
+    
     private String createdAt;
+    
     private String lastLogin;
+    
     private List<CarResponse> cars = new ArrayList<>();
     
     public UserCreated(Long id, String firstName, String lastName, String birthday, String phone, String email, String createdAt, String lastLogin) {

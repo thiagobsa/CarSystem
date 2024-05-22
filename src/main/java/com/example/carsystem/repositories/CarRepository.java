@@ -11,7 +11,9 @@ import com.example.carsystem.models.CarEntity;
 @Repository
 public interface CarRepository extends JpaRepository<CarEntity, Long> {
 
+	
+	boolean existsByLicensePlate(String licensePlate);
+
     Page<CarEntity> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    boolean existsByLicensePlate(String licensePlate);
 }
