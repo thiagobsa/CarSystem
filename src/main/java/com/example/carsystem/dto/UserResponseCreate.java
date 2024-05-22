@@ -100,4 +100,9 @@ public class UserResponseCreate {
     public List<CarResponse> getCars() {
         return cars;
     }
+
+	public void setUsername(String string) {
+		this.setUsername(string);
+		
+	}
 }

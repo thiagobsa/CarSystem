@@ -18,6 +18,10 @@ public class UserControllerImpl implements UserController{
 
     @Autowired
     private UserService userService;
+    
+    public UserControllerImpl(UserService userService) {
+        this.userService = userService;
+    }
 
 
     @Override
