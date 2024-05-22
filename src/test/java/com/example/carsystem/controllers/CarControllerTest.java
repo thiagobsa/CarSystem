@@ -1,7 +1,6 @@
 package com.example.carsystem.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,7 +33,7 @@ public class CarControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // Configurar comportamento do serviço mock para retornar um carro criado
+        
         testCarResponse = new CarResponse();
         testCarResponse.setId(1L);
         testCarResponse.setModel("TestModel");
@@ -53,7 +52,7 @@ public class CarControllerTest {
 
     @Test
     public void testFindAllPaged_Success() {
-        // Configurar comportamento do serviço mock para retornar uma página de carros
+        
         Page<CarResponse> page = mock(Page.class);
         when(carService.findAllPaged(any(), any())).thenReturn(page);
 
@@ -66,7 +65,7 @@ public class CarControllerTest {
 
     @Test
     public void testFindById_Success() {
-        // Configurar comportamento do serviço mock para retornar um carro por ID
+        
         when(carService.findById("token",(long) 1));
 
         ResponseEntity<CarResponse> response = carController.findById("token", 1L);
@@ -86,7 +85,7 @@ public class CarControllerTest {
 
     @Test
     public void testUpdateCar_Success() {
-        // Configurar comportamento do serviço mock para retornar um carro atualizado
+        
         CarResponse updatedCarResponse = mock(CarResponse.class);
         when(carService.update("token",any(), any())).thenReturn(updatedCarResponse);
 
