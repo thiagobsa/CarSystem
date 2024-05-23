@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example_password
+      MYSQL_DATABASE: example_database
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+    ports:
+      - "3306:3306"
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring_boot_app
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/example_database
+      SPRING_DATASOURCE_USERNAME: example_user
+      SPRING_DATASOURCE_PASSWORD: example_password
+    ports:
+      - "8080:8080"
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example_password
+      MYSQL_DATABASE: example_database
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+    ports:
+      - "3306:3306"
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring_boot_app
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/example_database
+      SPRING_DATASOURCE_USERNAME: example_user
+      SPRING_DATASOURCE_PASSWORD: example_password
+    ports:
+      - "8080:8080"
+      
