@@ -7,18 +7,29 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 @Getter
 @Setter
 @Data
 public class UserResponseCreate {
 
+
     private Long id;
+
     private String firstName;
+
     private String lastName;
+
     private String email;
+
     private String birthday;
+
     private String phone;
+    
     private String createdAt;
+    
     private String lastLogin;
 
     private List<CarResponse> cars = new ArrayList<>();
