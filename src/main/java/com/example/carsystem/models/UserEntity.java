@@ -18,6 +18,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.Pattern;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,30 +44,40 @@ public class UserEntity implements UserDetails, Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    
+    @GeneratedValue(strategy = GenerationType.IDENTITY)    
     private Long id;
     
+    @NotBlank
     private String firstName;
     
+    @NotBlank
     private String lastName;
     
+    @NotBlank
+    @Email
     private String email;
     
+    @NotNull
     private Date birthday;
     
+    @NotNull
     private String login;
     
+    @NotNull
     private String password;
     
+    @NotBlank
+    @Pattern(regexp = "\\d{10}")
     private String phone;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<CarEntity> cars = new ArrayList<>();
 
+    @PastOrPresent
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant createdAt;
     
+    @PastOrPresent
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant lastLogin;
 

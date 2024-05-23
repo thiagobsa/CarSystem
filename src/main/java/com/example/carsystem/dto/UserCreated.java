@@ -1,14 +1,16 @@
 package com.example.carsystem.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,22 +18,24 @@ import java.util.List;
 @Setter
 public class UserCreated {
 
+
     private Long id;
-    
+
     private String firstName;
-    
+
     private String lastName;
-    
+
     private String birthday;
-    
+
     private String phone;
-    
+
     private String email;
-    
+
     private String createdAt;
-    
+
     private String lastLogin;
     
+    @Valid
     private List<CarResponse> cars = new ArrayList<>();
     
     public UserCreated(Long id, String firstName, String lastName, String birthday, String phone, String email, String createdAt, String lastLogin) {

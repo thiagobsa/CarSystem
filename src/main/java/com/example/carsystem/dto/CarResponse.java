@@ -5,12 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class CarResponse {
-	
+    
+    
     private Long id;
     
     private Integer year;
@@ -20,6 +23,4 @@ public class CarResponse {
     private String model;
     
     private String color;
-    
-    
 }

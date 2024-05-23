@@ -2,6 +2,11 @@ package com.example.carsystem.models;
 
 import lombok.*;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -18,9 +23,19 @@ public class CarEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @NotNull
     private Integer year;
+    
+    @NotBlank
+    @Size(min = 6, max = 10)
+    @Pattern(regexp = "[A-Za-z0-9-]+")
     private String licensePlate;
+    
+    @NotBlank
     private String model;
+    
+    @NotBlank
     private String color;
 
     @ManyToOne
